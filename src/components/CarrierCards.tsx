@@ -337,14 +337,14 @@ export const CarrierCards: React.FC<CarrierCardsProps> = ({
   onPriceUpdate, 
   shipmentInfo 
 }) => {
-  // Group quotes by carrierCode (from Project44 response), fallback to carrier name
+  // Group quotes by carrier ID (use SCAC as primary identifier, fallback to carrier name)
   const carrierGroups = quotes.reduce((groups, quote) => {
-    // Use carrierCode as primary grouping key, fallback to carrier name
-    const carrierKey = quote.carrierCode || quote.carrier.name;
+    // Use SCAC as primary carrier ID, fallback to carrierCode, then carrier name
+    const carrierId = quote.carrier.scac || quote.carrierCode || quote.carrier.name;
     const carrierName = quote.carrier.name;
     
-    if (!groups[carrierKey]) {
-      groups[carrierKey] = {
+    if (!groups[carrierId]) {
+      groups[carrierId] = {
         name: carrierName,
         info: {
           scac: quote.carrier.scac || quote.carrierCode,
@@ -355,7 +355,7 @@ export const CarrierCards: React.FC<CarrierCardsProps> = ({
       };
     }
     
-    groups[carrierKey].quotes.push(quote);
+    groups[carrierId].quotes.push(quote);
     return groups;
   }, {} as Record<string, {
     name: string;
@@ -408,8 +408,8 @@ export const CarrierCards: React.FC<CarrierCardsProps> = ({
 
       {/* Carrier Cards */}
       <div className="space-y-6">
-        {sortedCarriers.map(([carrierKey, carrierGroup], index) => (
-          <div key={carrierKey} className="relative">
+        {sortedCarriers.map(([carrierId, carrierGroup], index) => (
+          <div key={carrierId} className="relative">
             {index === 0 && (
               <div className="absolute -top-2 -right-2 z-10">
                 <div className="bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg">
